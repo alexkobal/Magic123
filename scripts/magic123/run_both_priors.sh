@@ -53,6 +53,7 @@ if (( ${step1} )); then
         --t_range 0.2 0.6 \
         --bg_radius -1 \
         --save_mesh \
+    	--vram_O \
         ${@:7}
 fi
 
@@ -72,5 +73,6 @@ if (( ${step2} )); then
         --guidance_scale 100 5 \
         --rm_edge \
         --bg_radius -1 \
-        --save_mesh 
+        --save_mesh \
+	    --vram_O
 fi

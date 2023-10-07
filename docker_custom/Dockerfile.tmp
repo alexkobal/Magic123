@@ -1,0 +1,27 @@
+FROM nvidia/cuda:11.7.1-devel-ubuntu22.04
+
+# Check if the nvidia runtima is active
+RUN nvidia-smi
+
+# To test if the nvidia runtime is installed run:
+# # docker run --rm --runtime=nvidia nvidia/cuda:11.7.1-devel-ubuntu22.04 nvidia-smi
+
+# Solution install older docker version Docker 20.10
+# https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/1.8.1/install-guide.html
+
+# If docker can not find the socket than you can fix it like in:
+# https://superuser.com/questions/1741326/how-to-connect-to-docker-daemon-if-unix-var-run-docker-sock-is-not-available
+
+# This command sets the default shell to be bash instead of sh
+SHELL ["/bin/bash", "-c"]
+
+RUN apt update && apt install -y \
+    git \
+    wget \
+    libeigen3-dev \
+    python3.10 \
+    python3-pip \
+    ffmpeg \
+    libsm6 \
+    libxext6 \
+    python3.10-venv
