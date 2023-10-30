@@ -17,8 +17,6 @@ else
         --gpus all \
         --name magic123 \
         -w /workdir/Magic123 \
-        #-u $(id -u):$(id -g) \
         -v /data:/data\
-        #-v /home/sandor/GIT/Magic123:/workdir/Magic123 \
         magic123:latest
 fi

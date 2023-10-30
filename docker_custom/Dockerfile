@@ -44,6 +44,7 @@ ENV VIRTUAL_ENV=/workdir/Magic123/venv_magic123
 RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-RUN pip3 install torch torchvision
+#RUN pip3 install torch torchvision
+RUN pip install torch==2.0.1+cu117 torchvision==0.15.2+cu117 --index-url https://download.pytorch.org/whl/cu117
 RUN pip3 install -r requirements.txt
 RUN bash scripts/install_ext.sh
