@@ -1,13 +1,13 @@
 
 examples=(
-	'/data/sandor/images/monopointcloud/multiview/input/statue_1'
-    '/data/sandor/images/monopointcloud/multiview/input/statue_2'
+	'/data/sandor/images/monopointcloud/multiview/input/view_1'
+    '/data/sandor/images/monopointcloud/multiview/input/view_2'
 )
 
 for i in "${examples[@]}"; do
 	filename=$(basename "$i")
     echo "Processing $filename"
-	bash scripts/textual_inversion/textual_inversion.sh 0 runwayml/stable-diffusion-v1-5 "$i"/rgba.png out/textual_inversion/${filename} _nerf_${filename}_ ${filename} --max_train_steps 3000
+	bash scripts/textual_inversion/textual_inversion.sh 0 runwayml/stable-diffusion-v1-5 "$i"/rgba.png out/textual_inversion/${filename} _nerf_${filename}_ statue --max_train_steps 3000
 done
 
 # device=$1

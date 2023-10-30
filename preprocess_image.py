@@ -263,6 +263,13 @@ def process_single_image(image_path, depth_estimator, normal_estimator=None):
     # breakpoint()
     if not os.path.exists(rgba_path):
         cv2.imwrite(rgba_path, cv2.cvtColor(rgba, cv2.COLOR_RGBA2BGRA))
+    else:
+        rgba_path = rgba_path.replace('.png', '_preprocessed.png')
+        cv2.imwrite(rgba_path, cv2.cvtColor(rgba, cv2.COLOR_RGBA2BGRA))
+    
+    # write preprocessed image
+    image_path = image_path.replace('.png', '_preprocessed.png')
+    cv2.imwrite(image_path, cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
 
 if __name__ == '__main__':
     import glob
