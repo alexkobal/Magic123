@@ -1,7 +1,7 @@
 
 examples=(
-	'/data/sandor/images/monopointcloud/multiview/input/view_1'
-    '/data/sandor/images/monopointcloud/multiview/input/view_2'
+	'/data/sandor/images/monopointcloud/multiview/preprocessed/view_1'
+    '/data/sandor/images/monopointcloud/multiview/preprocessed/view_2'
 )
 
 for i in "${examples[@]}"; do
