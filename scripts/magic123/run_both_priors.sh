@@ -28,7 +28,6 @@ echo "number of gpus:" $NUM_GPU_AVAILABLE
 RUN_ID=$2 # jobname for the first stage
 RUN_ID2=$3 # jobname for the second stage
 DATA_DIR=$4 # path to the directory containing the images, e.g. data/nerf4/chair
-IMAGE_NAME=rgba.png # name of the image file, e.g. rgba.png
 CONFIG_NAME=conf.csv # name of the image config file, e.g. conf.csv
 step1=$5 # whether to use the first stage
 step2=$6 # whether to use the second stage
@@ -77,3 +76,5 @@ if (( ${step2} )); then
         --save_mesh \
 	    --vram_O
 fi
+
+# bash scripts/magic123/run_both_priors.sh 0 nerf dmtet /data/sandor/images/monopointcloud/multiview/reconstruction 1 1

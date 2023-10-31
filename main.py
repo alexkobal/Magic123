@@ -404,6 +404,9 @@ if __name__ == '__main__':
     if len(opt.images) == 0:
         opt.images = None
 
+    # print the list of images being processed
+    print('Images:\n', opt.images)
+
     # default parameters for finetuning
     if opt.dmtet:
         opt.h = int(opt.h * opt.dmtet_reso_scale)
