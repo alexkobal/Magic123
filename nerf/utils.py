@@ -668,12 +668,19 @@ class Trainer(object):
         # known view loss
         loss_rgb, loss_mask, loss_normal, loss_depth, loss_sds, loss_if, loss_zero123, loss_clip, loss_entropy, loss_opacity, loss_orient, loss_smooth, loss_smooth2d, loss_smooth3d, loss_mesh_normal, loss_mesh_lap = torch.zeros(16, device=self.device)
         # known view loss
+        print('Shape on gt before choice:')
         if do_rgbd_loss:
             gt_mask = self.mask # [B, H, W]
             gt_rgb = self.rgb   # [B, 3, H, W]
             gt_opacity = self.opacity   # [B, 1, H, W]
             gt_normal = self.normal # [B, H, W, 3]
             gt_depth = self.depth   # [B, H, W]
+
+            print('gt_mask', gt_mask.shape)
+            print('gt_rgb', gt_rgb.shape)
+            print('gt_opacity', gt_opacity.shape)
+            # print('gt_normal', gt_normal.shape)
+            print('gt_depth', gt_depth.shape)
 
             if len(gt_rgb) > self.opt.batch_size:
                 gt_mask = gt_mask[choice]
@@ -685,6 +692,14 @@ class Trainer(object):
                     gt_normal = None
                 gt_depth = gt_depth[choice]
 
+            print('Shape on gt after choice:')
+            print('gt_mask', gt_mask.shape)
+            print('gt_rgb', gt_rgb.shape)
+            print('gt_opacity', gt_opacity.shape)
+            # print('gt_normal', gt_normal.shape)
+            print('gt_depth', gt_depth.shape)
+
+            print('Shape on pred:', pred_rgb.shape)
             # color loss
             loss_rgb = self.opt.lambda_rgb * \
                 F.mse_loss(pred_rgb*gt_opacity, gt_rgb*gt_opacity)
