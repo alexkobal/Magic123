@@ -471,6 +471,7 @@ if __name__ == '__main__':
             f'--backbone {opt.backbone} is not implemented!')
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print('Using device:', device)
     opt.device = device
     model = NeRFNetwork(opt).to(device)
 
