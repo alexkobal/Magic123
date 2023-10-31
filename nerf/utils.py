@@ -679,7 +679,10 @@ class Trainer(object):
                 gt_mask = gt_mask[choice]
                 gt_rgb = gt_rgb[choice]
                 gt_opacity = gt_opacity[choice]
-                gt_normal = gt_normal[choice]
+                if gt_normal is not None:
+                    gt_normal = gt_normal[choice]
+                else:
+                    gt_normal = None
                 gt_depth = gt_depth[choice]
 
             # color loss
