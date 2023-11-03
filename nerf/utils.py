@@ -409,7 +409,7 @@ class Trainer(object):
             rgb_hw = rgba_hw[..., :3] * rgba_hw[..., 3:] + (1 - rgba_hw[..., 3:]) 
             self.rgb = torch.from_numpy(rgb_hw).permute(0,3,1,2).contiguous().to(self.device)
             self.mask = torch.from_numpy(mask).to(self.device)
-            self.opacity = torch.from_numpy(mask_no_edge).to(self.device).to(torch.float32).unsqueeze(0)
+            self.opacity = torch.from_numpy(mask_no_edge).to(self.device).to(torch.float32).unsqueeze(1)
             print(f'[INFO] dataset: load image prompt {self.opt.images} {self.rgb.shape}')
 
             # load depth
@@ -424,7 +424,7 @@ class Trainer(object):
                 if self.opt.normalize_depth:
                     self.depth = nonzero_normalize_depth(self.depth, self.mask)
                 #save_tensor2image(self.depth, os.path.join(self.workspace, 'depth_resized.jpg'))
-                self.depth = self.depth[self.mask]
+                self.depth = torch.where(self.mask, self.depth, 1.0) # Set masked out part to white
                 print(f'[INFO] dataset: load depth prompt {depth_paths} {self.depth.shape}')
             else:
                 self.depth = None
@@ -668,19 +668,12 @@ class Trainer(object):
         # known view loss
         loss_rgb, loss_mask, loss_normal, loss_depth, loss_sds, loss_if, loss_zero123, loss_clip, loss_entropy, loss_opacity, loss_orient, loss_smooth, loss_smooth2d, loss_smooth3d, loss_mesh_normal, loss_mesh_lap = torch.zeros(16, device=self.device)
         # known view loss
-        print('Shape on gt before choice:')
         if do_rgbd_loss:
             gt_mask = self.mask # [B, H, W]
             gt_rgb = self.rgb   # [B, 3, H, W]
             gt_opacity = self.opacity   # [B, 1, H, W]
             gt_normal = self.normal # [B, H, W, 3]
             gt_depth = self.depth   # [B, H, W]
-
-            print('gt_mask', gt_mask.shape)
-            print('gt_rgb', gt_rgb.shape)
-            print('gt_opacity', gt_opacity.shape)
-            # print('gt_normal', gt_normal.shape)
-            print('gt_depth', gt_depth.shape)
 
             if len(gt_rgb) > self.opt.batch_size:
                 gt_mask = gt_mask[choice]
@@ -691,15 +684,10 @@ class Trainer(object):
                 else:
                     gt_normal = None
                 gt_depth = gt_depth[choice]
+                
+            # Mask depth after choice
+            gt_depth = gt_depth[gt_mask]
 
-            print('Shape on gt after choice:')
-            print('gt_mask', gt_mask.shape)
-            print('gt_rgb', gt_rgb.shape)
-            print('gt_opacity', gt_opacity.shape)
-            # print('gt_normal', gt_normal.shape)
-            print('gt_depth', gt_depth.shape)
-
-            print('Shape on pred:', pred_rgb.shape)
             # color loss
             loss_rgb = self.opt.lambda_rgb * \
                 F.mse_loss(pred_rgb*gt_opacity, gt_rgb*gt_opacity)
@@ -717,8 +705,8 @@ class Trainer(object):
 
             # relative depth loss
             if self.opt.lambda_depth > 0 and self.depth is not None:
-                valid_pred_depth = pred_depth[:, 0][self.mask]
-                loss_depth = self.opt.lambda_depth * (1 - pearson_corrcoef(valid_pred_depth, self.depth))/2
+                valid_pred_depth = pred_depth[:, 0][gt_mask]
+                loss_depth = self.opt.lambda_depth * (1 - pearson_corrcoef(valid_pred_depth, gt_depth))/2
             
             loss = loss_rgb + loss_mask + loss_normal + loss_depth
         # novel view loss
