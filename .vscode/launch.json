@@ -1,0 +1,46 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Coarse stage debugging",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "env": {
+                "DATA_DIR": "/data/sandor/images/monopointcloud/multiview/reconstruction",
+                "CONFIG_NAME": "conf.csv",
+                "WORKSPACE": "out/magic123-nerf-coarse/multiview/magic123_reconstruction_nerf_coarse",
+            },
+            "args" : ["-O", 
+                    "--text", "A high-resolution DSLR image of <token>", 
+                    "--sd_version", "1.5", 
+                    "--image_config", "/data/sandor/images/monopointcloud/multiview/reconstruction/conf.csv", 
+                    "--learned_embeds_path", "/data/sandor/images/monopointcloud/multiview/reconstruction/learned_embeds.bin", 
+                    "--workspace", "out/magic123-nerf-coarse/multiview/magic123_reconstruction_nerf_coarse", 
+                    "--optim", "adam", 
+                    "--iters", "5000", 
+                    "--guidance", "SD", "zero123", 
+                    "--lambda_guidance", "1.0", "40", 
+                    "--guidance_scale", "100", "5", 
+                    "--latent_iter_ratio", "0", 
+                    "--normal_iter_ratio", "0.2", 
+                    "--t_range", "0.2", "0.6", 
+                    "--bg_radius", "-1", 
+                    "--save_mesh", 
+                    "--vram_O"
+            ],
+            "justMyCode": true
+        },
+        {
+            "name": "Python: Attach using Process Id",
+            "type": "python",
+            "request": "attach",
+            "processId": "${command:pickProcess}",
+            "justMyCode": true
+        }
+    ]
+}
