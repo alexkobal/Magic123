@@ -54,6 +54,7 @@ if (( ${step1} )); then
         --bg_radius -1 \
         --save_mesh \
     	--vram_O \
+        --fp16 \
         ${@:7}
 fi
 
