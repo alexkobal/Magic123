@@ -423,7 +423,7 @@ class Trainer(object):
                     logger.info(f'[WARN] dataset: {depth_paths[0]} has more than one channel, only use the first channel')
                 if self.opt.normalize_depth:
                     self.depth = nonzero_normalize_depth(self.depth, self.mask)
-                #save_tensor2image(self.depth, os.path.join(self.workspace, 'depth_resized.jpg'))
+                save_tensor2image(self.depth[0, ...], os.path.join(self.workspace, 'depth_resized.jpg'))
                 self.depth = torch.where(self.mask, self.depth, 1.0) # Set masked out part to white
                 print(f'[INFO] dataset: load depth prompt {depth_paths} {self.depth.shape}')
             else:
@@ -441,7 +441,7 @@ class Trainer(object):
                     normals.append(normal)
                 normal = np.stack([cv2.resize(normal, (w, h), interpolation=cv2.INTER_AREA) for normal in normals])
                 self.normal = torch.from_numpy(normal.astype(np.float32) / 255).to(self.device)
-                #save_tensor2image(self.normal, os.path.join(self.workspace, 'normal_resized.jpg'), channel_last=True)
+                save_tensor2image(self.normal[0, ...], os.path.join(self.workspace, 'normal_resized.jpg'), channel_last=True)
                 print(f'[INFO] dataset: load normal prompt {normal_paths} {self.normal.shape}')
                 self.normal = self.normal[self.mask]
             else:
@@ -449,8 +449,8 @@ class Trainer(object):
                 logger.info(f'[WARN] dataset: {normal_paths[0]} is not found')
 
             # save for debug
-            #save_tensor2image(self.rgb[0, ...], os.path.join(self.workspace, 'rgb_resized.png'), channel_last=False)
-            #save_tensor2image(self.opacity, os.path.join(self.workspace, 'opacity_resized.png'), channel_last=False)
+            save_tensor2image(self.rgb[0, ...], os.path.join(self.workspace, 'rgb_resized.png'), channel_last=False)
+            save_tensor2image(self.opacity[0, ...], os.path.join(self.workspace, 'opacity_resized.png'), channel_last=False)
 
             # encode embeddings for zero123
             if 'zero123' in self.guidance:
