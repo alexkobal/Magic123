@@ -28,7 +28,7 @@ echo "number of gpus:" $NUM_GPU_AVAILABLE
 RUN_ID=$2 # jobname for the first stage
 RUN_ID2=$3 # jobname for the second stage
 DATA_DIR=$4 # path to the directory containing the images, e.g. data/nerf4/chair
-IMAGE_NAME=rgba.png # name of the image file, e.g. rgba.png
+CONFIG_NAME=conf.csv # name of the image config file, e.g. conf.csv
 step1=$5 # whether to use the first stage
 step2=$6 # whether to use the second stage
 
@@ -40,7 +40,7 @@ if (( ${step1} )); then
     CUDA_VISIBLE_DEVICES=$1 python main.py -O \
         --text "A high-resolution DSLR image of <token>" \
         --sd_version 1.5 \
-        --image ${DATA_DIR}/${IMAGE_NAME} \
+        --image_config ${DATA_DIR}/${CONFIG_NAME} \
         --learned_embeds_path ${DATA_DIR}/learned_embeds.bin \
         --workspace out/magic123-${RUN_ID}-coarse/$dataset/magic123_${FILENAME}_${RUN_ID}_coarse \
         --optim adam \
@@ -53,6 +53,7 @@ if (( ${step1} )); then
         --t_range 0.2 0.6 \
         --bg_radius -1 \
         --save_mesh \
+    	--vram_O \
         ${@:7}
 fi
 
@@ -60,7 +61,7 @@ if (( ${step2} )); then
     CUDA_VISIBLE_DEVICES=$1 python main.py -O \
         --text "A high-resolution DSLR image of <token>" \
         --sd_version 1.5 \
-        --image ${DATA_DIR}/${IMAGE_NAME} \
+        --image_config ${DATA_DIR}/${CONFIG_NAME} \
         --learned_embeds_path ${DATA_DIR}/learned_embeds.bin \
         --workspace out/magic123-${RUN_ID}-${RUN_ID2}/$dataset/magic123_${FILENAME}_${RUN_ID}_${RUN_ID2} \
         --dmtet --init_ckpt out/magic123-${RUN_ID}-coarse/$dataset/magic123_${FILENAME}_${RUN_ID}_coarse/checkpoints/magic123_${FILENAME}_${RUN_ID}_coarse.pth \
@@ -72,5 +73,8 @@ if (( ${step2} )); then
         --guidance_scale 100 5 \
         --rm_edge \
         --bg_radius -1 \
-        --save_mesh 
+        --save_mesh \
+	    --vram_O
 fi
+
+# bash scripts/magic123/run_both_priors.sh 0 nerf dmtet /data/sandor/images/monopointcloud/multiview/reconstruction 1 1

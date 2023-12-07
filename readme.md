@@ -75,6 +75,18 @@ Note: in this `install.sh`, we use python venv by default. If you prefer conda, 
     cd ../../
     ```
 
+### Run in docker (Optional)
+- We provide a docker image for running Magic123. To run in docker, first install docker and nvidia-docker. Then, build the docker image by:
+
+    ```bash
+    cd docker_custom
+    docker build -t magic123:latest .
+    ```
+
+- To run the docker container use the `docker_custom/go_docker.sh` script. The script will start a container on the first run and will attach to the same container on subsequent runs.
+
+- To remove the docker container run the `docker_custom/rm_docker.sh` script.
+
 # Usage
 ## Preprocess [Optional]
 We have included all preprocessed files in `./data` directory. Preprocessing is only necessary if you want to test on your own examples. Takes seconds.  
@@ -88,7 +100,7 @@ python preprocess_image.py --path /path/to/image
 ### Step 2: textual inversion [Optional]
 Magic123 uses the default [textual inversion](https://huggingface.co/docs/diffusers/training/text_inversion) from diffuers, which consumes around 2 hours on a 32G V100. If you do not want to spend time in this textual inversion, you can: (1) study whether there is other faster textual inversion; or (2) do not use textual inversion in the loss of texture and shape consistencies.  To run textual inversion: 
 
-```
+```bash
 bash scripts/textual_inversion/textual_inversion.sh $GPU_IDX runwayml/stable-diffusion-v1-5 /path/to/example/rgba.png /path/to/save $token_name $init_token --max_train_steps 5000
 ```
 $token_name is a the special token, usually name that by _examplename_
@@ -198,6 +210,31 @@ textual inversion is tedious (requires ~2.5 hours optimization), if you want to 
     bash scripts/magic123/run_3dprior.sh 0 nerf dmtet data/demo/a-full-body-ironman 1 1
     ```
 
+### Run with multiple input images
+- Run Textual inversion for a folder containing all of the images (can be in hieararchy).
+    ```bash
+    bash scripts/textual_inversion/textual_inversion_folder.sh $GPU_IDX runwayml/stable-diffusion-v1-5 /path/to/example/folder /path/to/save $token_name $init_token --max_train_steps 3000
+    ```
+
+- Create a conf.csv file with the following format:
+    ```
+    radius,polar,azimuth,zero123_weight,image
+    [0, 1], [-90, 90], [0, 360], [0, 1], /path/to/image1
+    [0, 1], [-90, 90], [0, 360], [0, 1], /path/to/image2
+    ...
+    ```
+
+- Place the conf.csv file and the learned_embeds.bin file under the same folder, f.e. 
+    ```
+    example/reconstruction/input/
+    ├── conf.csv
+    ├── learned_embeds.bin
+    ```
+
+- Run the reconstruction run_both_priors_multiview.sh script:
+    ```bash
+    bash scripts/magic123/run_both_priors_multiview.sh 0 nerf dmtet example/reconstruction/input 1 1
+    ```
 
 # Tips and Tricks
 1. Fix camera distance (*radius_range*) and FOV (*fovy_range*) and tune the camera polar range (*theta_range*). Note it is better to keep camera jittering to reduce grid artifacts. 

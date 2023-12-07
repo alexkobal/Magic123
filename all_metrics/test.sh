@@ -11,3 +11,5 @@ python all_metrics/metric_utils.py --datasets  nerf4 realfusion15 --pred_pattern
 # python all_metrics/metric_utils.py --datasets nerf4 realfusion15 --pred_pattern "all_outputs/real_fusion" --results_folder "colors" --rgb_name ""
 # python all_metrics/metric_utils.py --datasets nerf4 realfusion15 --pred_pattern "all_outputs/shape" --results_folder "" --rgb_name "" --first_str "0."
 # python all_metrics/metric_utils.py --datasets realfusion15 --pred_pattern "all_outputs/pointe-r100" --results_folder "" --rgb_name "" --first_str "0."
+
+python all_metrics/metric_utils.py --input_path "/srv/data/mszanto/skobal/multiview/preprocessed" --datasets multiview --pred_pattern "/srv/data/mszanto/skobal/out_small_radius/magic123-nerf-coarse*" --results_folder "color" --rgb_name "" --first_str "*_0_*"

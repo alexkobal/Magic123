@@ -409,7 +409,7 @@ class Trainer(object):
             rgb_hw = rgba_hw[..., :3] * rgba_hw[..., 3:] + (1 - rgba_hw[..., 3:]) 
             self.rgb = torch.from_numpy(rgb_hw).permute(0,3,1,2).contiguous().to(self.device)
             self.mask = torch.from_numpy(mask).to(self.device)
-            self.opacity = torch.from_numpy(mask_no_edge).to(self.device).to(torch.float32).unsqueeze(0)
+            self.opacity = torch.from_numpy(mask_no_edge).to(self.device).to(torch.float32).unsqueeze(1)
             print(f'[INFO] dataset: load image prompt {self.opt.images} {self.rgb.shape}')
 
             # load depth
@@ -423,8 +423,8 @@ class Trainer(object):
                     logger.info(f'[WARN] dataset: {depth_paths[0]} has more than one channel, only use the first channel')
                 if self.opt.normalize_depth:
                     self.depth = nonzero_normalize_depth(self.depth, self.mask)
-                save_tensor2image(self.depth, os.path.join(self.workspace, 'depth_resized.jpg'))
-                self.depth = self.depth[self.mask]
+                save_tensor2image(self.depth[0, ...], os.path.join(self.workspace, 'depth_resized.jpg'))
+                self.depth = torch.where(self.mask, self.depth, 1.0) # Set masked out part to white
                 print(f'[INFO] dataset: load depth prompt {depth_paths} {self.depth.shape}')
             else:
                 self.depth = None
@@ -441,7 +441,7 @@ class Trainer(object):
                     normals.append(normal)
                 normal = np.stack([cv2.resize(normal, (w, h), interpolation=cv2.INTER_AREA) for normal in normals])
                 self.normal = torch.from_numpy(normal.astype(np.float32) / 255).to(self.device)
-                save_tensor2image(self.normal, os.path.join(self.workspace, 'normal_resized.jpg'), channel_last=True)
+                save_tensor2image(self.normal[0, ...], os.path.join(self.workspace, 'normal_resized.jpg'), channel_last=True)
                 print(f'[INFO] dataset: load normal prompt {normal_paths} {self.normal.shape}')
                 self.normal = self.normal[self.mask]
             else:
@@ -449,8 +449,8 @@ class Trainer(object):
                 logger.info(f'[WARN] dataset: {normal_paths[0]} is not found')
 
             # save for debug
-            save_tensor2image(self.rgb, os.path.join(self.workspace, 'rgb_resized.png'), channel_last=False)
-            save_tensor2image(self.opacity, os.path.join(self.workspace, 'opacity_resized.png'), channel_last=False)
+            save_tensor2image(self.rgb[0, ...], os.path.join(self.workspace, 'rgb_resized.png'), channel_last=False)
+            save_tensor2image(self.opacity[0, ...], os.path.join(self.workspace, 'opacity_resized.png'), channel_last=False)
 
             # encode embeddings for zero123
             if 'zero123' in self.guidance:
@@ -679,8 +679,14 @@ class Trainer(object):
                 gt_mask = gt_mask[choice]
                 gt_rgb = gt_rgb[choice]
                 gt_opacity = gt_opacity[choice]
-                gt_normal = gt_normal[choice]
+                if gt_normal is not None:
+                    gt_normal = gt_normal[choice]
+                else:
+                    gt_normal = None
                 gt_depth = gt_depth[choice]
+                
+            # Mask depth after choice
+            gt_depth = gt_depth[gt_mask]
 
             # color loss
             loss_rgb = self.opt.lambda_rgb * \
@@ -699,8 +705,8 @@ class Trainer(object):
 
             # relative depth loss
             if self.opt.lambda_depth > 0 and self.depth is not None:
-                valid_pred_depth = pred_depth[:, 0][self.mask]
-                loss_depth = self.opt.lambda_depth * (1 - pearson_corrcoef(valid_pred_depth, self.depth))/2
+                valid_pred_depth = pred_depth[:, 0][gt_mask]
+                loss_depth = self.opt.lambda_depth * (1 - pearson_corrcoef(valid_pred_depth, gt_depth))/2
             
             loss = loss_rgb + loss_mask + loss_normal + loss_depth
         # novel view loss

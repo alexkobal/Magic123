@@ -16,7 +16,8 @@ scripts/paper
 build/
 *.egg-info/
 *.so
-.vscode/ 
+.vscode/*
+!.vscode/launch.json
 
 tmp*
 data/

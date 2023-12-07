@@ -216,8 +216,14 @@ def process_single_image(image_path, depth_estimator, normal_estimator=None):
         rgba = BackgroundRemoval()(image)  # [H, W, 4]
 
     # Predict depth using Midas
+    if os.path.exists(depth_path):
+        print(f'[INFO] loading depth image {depth_path}...')
+        depth = cv2.cvtColor(cv2.imread(depth_path, cv2.IMREAD_UNCHANGED), cv2.COLOR_BGR2GRAY)
+        depth = depth.astype(np.float32) / 255
+    else:
+        print(f'[INFO] depth estimation...')
+        depth = depth_estimator.get_monocular_depth(image/255)
     mask = rgba[..., -1] > 0
-    depth = depth_estimator.get_monocular_depth(image/255)
     depth[mask] = (depth[mask] - depth[mask].min()) / (depth[mask].max() - depth[mask].min() + 1e-9)
     depth[~mask] = 0
     depth = (depth * 255).astype(np.uint8)
@@ -248,11 +254,22 @@ def process_single_image(image_path, depth_estimator, normal_estimator=None):
     rgba = np.pad(rgba, padding, mode='constant', constant_values=0)
     depth = np.pad(depth, padding2d, mode='constant', constant_values=0)
 
-    cv2.imwrite(depth_path, depth)
+    if not os.path.exists(depth_path):
+        cv2.imwrite(depth_path, depth)
+    else:
+        depth_path = depth_path.replace('.png', '_preprocessed.png')
+        cv2.imwrite(depth_path, depth)
     # cv2.imwrite(out_normal, cv2.cvtColor(normal, cv2.COLOR_RGB2BGR))
     # breakpoint()
     if not os.path.exists(rgba_path):
         cv2.imwrite(rgba_path, cv2.cvtColor(rgba, cv2.COLOR_RGBA2BGRA))
+    else:
+        rgba_path = rgba_path.replace('.png', '_preprocessed.png')
+        cv2.imwrite(rgba_path, cv2.cvtColor(rgba, cv2.COLOR_RGBA2BGRA))
+    
+    # write preprocessed image
+    image_path = image_path.replace('.png', '_preprocessed.png')
+    cv2.imwrite(image_path, cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
 
 if __name__ == '__main__':
     import glob
@@ -273,6 +290,7 @@ if __name__ == '__main__':
         for exclude_path in opt.exclude:
             if exclude_path in paths:
                 del paths[exclude_path] 
+    print ('Paths:\n', paths)
     for path in paths:
         process_single_image(path, depth_estimator, 
                             #  normal_estimator

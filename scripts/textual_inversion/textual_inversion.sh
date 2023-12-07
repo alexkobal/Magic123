@@ -39,7 +39,7 @@ CUDA_VISIBLE_DEVICES=$1 python textual-inversion/textual_inversion.py \
   --placeholder_token=$placeholder_token \
   --initializer_token=$init_token \
   --resolution=512 \
-  --train_batch_size=16 \
+  --train_batch_size=4 \
   --gradient_accumulation_steps=1 \
   --max_train_steps=3000 \
   --lr_scheduler="constant" \
@@ -49,4 +49,6 @@ CUDA_VISIBLE_DEVICES=$1 python textual-inversion/textual_inversion.py \
   ${@:7}
 
 # test textual inversion
-CUDA_VISIBLE_DEVICES=$1 python guidance/sd_utils.py --text "A high-resolution DSLR image of <token>" --learned_embeds_path $OUTPUT_DIR  --workspace $OUTPUT_DIR 
+echo "Test textual inversion"
+# CUDA_VISIBLE_DEVICES=$1 python guidance/sd_utils.py --text "A high-resolution DSLR image of <token>" --learned_embeds_path $OUTPUT_DIR  --workspace $OUTPUT_DIR 
+echo "Done testing textual inversion or test disabled"
