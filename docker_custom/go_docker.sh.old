@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-
-# start docker container in interactive mode with mounted volumes
-docker run -it --rm \
-    --gpus all \
-    --name magic123 \
-    -v /data:/data\
-    magic123:latest

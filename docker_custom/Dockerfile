@@ -1,7 +1,7 @@
 FROM nvidia/cuda:11.7.1-devel-ubuntu22.04
 
 # Check if the nvidia runtima is active
-RUN nvidia-smi
+# RUN nvidia-smi
 
 # To test if the nvidia runtime is installed run:
 # # docker run --rm --runtime=nvidia nvidia/cuda:11.7.1-devel-ubuntu22.04 nvidia-smi
